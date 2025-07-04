@@ -3,627 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>桌游卡牌拼版工具(适用TTS桌游模拟器）</title>
+    <title>桌游设计师工具箱</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <style>
-        /* 自定义样式 */
-        :root {
-            /* 默认深灰色主题变量 */
-            --bg-color: #333333;
-            --text-color: #e0e0e0;
-            --panel-bg: #292929;
-            --border-color: #444444;
-            --hover-color: #555555;
-            --input-bg: #3a3a3a;
-            --upload-area-bg: #292929;
-            --upload-hover-bg: #555555;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        dark: '#333333',
+                        light: '#FFFFFF'
+                    },
+                }
+            }
         }
-    
-        /* 白色主题 */
-        .theme-white {
-            --bg-color: #f9fafb;
-            --text-color: #111827;
-            --panel-bg: #f3f4f6;
-            --border-color: #d1d5db;
-            --hover-color: #e5e7eb;
-            --input-bg: #ffffff;
-            --upload-area-bg: #f3f4f6;
-            --upload-hover-bg: #e5e7eb;
-        }
-    
-        /* 深黑主题 */
-        .theme-black {
-            --bg-color: #000000;
-            --text-color: #F0F0F0;
-            --panel-bg: #121212;
-            --border-color: #222222;
-            --hover-color: #333333;
-            --input-bg: #121212;
-            --upload-area-bg: #121212;
-            --upload-hover-bg: #222222;
-        }
-    
-        /* 深灰色主题 */
-        .theme-dark-gray {
-            --bg-color: #333333;
-            --text-color: #e0e0e0;
-            --panel-bg: #292929;
-            --border-color: #444444;
-            --hover-color: #555555;
-            --input-bg: #3a3a3a;
-            --upload-area-bg: #292929;
-            --upload-hover-bg: #555555;
-        }
-    
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        /* 添加图片预览项样式 */
-        .preview-item {
-            position: relative;
-            border: 0px;
-            border-radius: 0px;
-            overflow: hidden;
-            display: flex; /* 添加flex布局 */
-            flex-direction: column; /* 垂直排列 */
-            align-items: center; /* 水平居中 */
-        }
-
-        /* 添加文件名样式 */
-        .preview-name {
-            padding: 4px 8px;
-            font-size: 12px;
-            color: var(--text-color);
-            background-color: rgba(0, 0, 0, 0);
-            width: 100%;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-sizing: border-box;
-        }
-
-        /* 删除按钮样式 */
-        .delete-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-            background-color: rgba(239, 68, 68, 1);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        /* 添加图片悬停半透明效果 */
-        .preview-item:hover img {
-            opacity: 0.1;
-            transition: opacity 0.2s;
-        }
-
-        .delete-btn:hover {
-            background-color: rgba(239, 68, 68, 1);
-        }
-
-        .preview-item:hover .delete-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* 滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--border-color);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--hover-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9CA3AF;
-        }
-
-        /* 文件拖放高亮效果 */
-        .drag-highlight {
-            border-color: #3B82F6 !important;
-            background-color: rgba(59, 130, 246, 1) !important;
-        }
-
-        /* 拖放排序样式 */
-        .preview-item.drag-over {
-            border: 5px dashed #3B82F6;
-        }
-
-        .preview-item.drag-over-before {
-            border-top: 3px solid #3B82F6;
-        }
-
-        .preview-item.drag-over-after {
-            border-bottom: 3px solid #3B82F6;
-        }
-
-        .preview-item.dragging {
-            opacity: 0.5;
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+            .card-hover {
+                transition: transform 0.2s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-3px);
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[var(--bg-color)] text-[var(--text-color)]">
-    <!-- 新增横幅广告栏位 -->
-    <div class="w-full bg-[var(--panel-bg)] border-b border-[var(--border-color)] py-2 px-4">
-        <a href="https://www.behance.net/psdoc" target="_blank">
-            <img src="./广告.jpg" alt="横幅广告" class="w-full h-auto max-h-48 object-contain mx-auto">
-        </a>
+<body class="bg-white min-h-screen text-dark">
+    <!-- 标题区域 -->
+    <div class="pt-20 pb-10 px-6">
+        <div class="container mx-auto text-center">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-blue-700 text-gradient">为桌游创作者打造的专业工具集</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto text-xl sm:text-2xl md:text-3xl">简化桌游设计流程，释放你的创意潜能</p>
+        </div>
     </div>
-    
-    <header class="py-4 px-6 border-b border-[var(--border-color)] flex items-center justify-between">
-        <h1 class="text-2xl font-bold"><i class="fa fa-th mr-2"></i>桌游卡牌拼版工具(适用TTS桌游模拟器）</h1>
-        <div class="flex space-x-2">
-            <button id="theme-white" class="p-2 rounded-full hover:bg-gray-700 transition-colors" title="白色主题">
-                <i class="fa fa-sun-o"></i>
-            </button>
-            <button id="theme-black" class="p-2 rounded-full hover:bg-gray-700 transition-colors" title="纯黑主题">
-                <i class="fa fa-moon-o"></i>
-            </button>
-            <button id="theme-dark-gray" class="p-2 rounded-full hover:bg-gray-700 transition-colors" title="深灰主题">
-                <i class="fa fa-adjust"></i>
-            </button>
-        </div>
-    </header>
-    
-    <main class="flex-grow p-6">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- 控制面板 -->
-            <div class="lg:col-span-1 bg-[var(--panel-bg)] rounded-lg p-5 border border-[var(--border-color)]">
-                <div class="mb-6">
-                    <h2 class="text-lg font-semibold mb-3 text-[var(--text-color)]">导入图片</h2>
-                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border-color)] rounded-lg cursor-pointer bg-[var(--upload-area-bg)] hover:bg-[var(--upload-hover-bg)] transition-colors">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <i class="fa fa-cloud-upload text-3xl text-[var(--text-color)] mb-2"></i>
-                            <p class="mb-1 text-sm text-[var(--text-color)]"><span class="font-semibold">点击上传</p>
-                            <p class="text-xs text-[var(--text-color)]">支持JPG, PNG格式 (最多70张)</p>
+    <!-- 核心工具区域 -->
+    <div class="py-12 px-6">
+        <div class="container mx-auto max-w-7xl">
+            <h3 class="text-2xl font-extrabold mb-10 text-center text-dark tracking-tight">核心工具</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center">
+                <!-- 工具1：卡牌拼版工具 -->
+                <a href="卡牌拼版工具.html" class="block mx-auto card-hover">
+                    <div class="bg-white rounded-2xl shadow-2xl ring-2 ring-gray-200 p-8 h-full flex flex-col items-center justify-between">
+                        <div class="mb-6 flex flex-col items-center">
+                            <div class="icon-wrapper flex justify-center items-center bg-primary rounded-full w-12 h-12 mb-4">
+                                <i class="fa fa-th text-white text-lg"></i>
+                            </div>
+                            <div class="tool-info text-center">
+                                <h4 class="text-lg font-bold mb-2 text-dark">TTS卡牌拼版工具</h4>
+                                <p class="text-sm text-gray-600">适用于Tabletop Simulator，完美复刻，一键导出</p>
+                            </div>
                         </div>
-                        <input id="file-input" type="file" accept="image/*" multiple class="hidden" />
-                    </label>
-                    <div id="file-count" class="mt-2 text-sm text-[var(--text-color)]">已选择: 0张图片</div>
+                        <div class="flex justify-center mt-auto">
+                            <span class="text-primary text-sm font-medium hover:underline">开始使用 <i class="fa fa-arrow-right ml-1"></i></span>
+                        </div>
+                    </div>
+                </a>
+                <!-- 工具2：敬请期待 -->
+                <div class="bg-white rounded-2xl shadow-2xl ring-2 ring-gray-200 p-8 h-full flex flex-col items-center justify-center opacity-70 card-hover">
+                    <div class="icon-wrapper flex justify-center items-center bg-gray-300 rounded-full w-12 h-12 mb-4">
+                        <i class="fa fa-clock-o text-gray-500 text-lg"></i>
+                    </div>
+                    <span class="text-gray-500 text-lg font-medium">敬请期待</span>
                 </div>
-
-                <div class="mb-6">
-                    <h2 class="text-lg font-semibold mb-3 text-[var(--text-color)]">布局设置</h2>
-                    <div class="mb-4">
-                        <label for="cards-per-row" class="block text-sm font-medium text-[var(--text-color)] mb-1">每行卡牌数量</label>
-                        <input type="number" id="cards-per-row" min="1" max="10" value="5" 
-                               class="w-full bg-[var(--input-bg)] border border-[var(--border-color)] rounded-md px-3 py-2 text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- 工具3：敬请期待 -->
+                <div class="bg-white rounded-2xl shadow-2xl ring-2 ring-gray-200 p-8 h-full flex flex-col items-center justify-center opacity-70 card-hover">
+                    <div class="icon-wrapper flex justify-center items-center bg-gray-300 rounded-full w-12 h-12 mb-4">
+                        <i class="fa fa-clock-o text-gray-500 text-lg"></i>
                     </div>
-                </div>
-                
-                <div class="mb-6">
-                    <h2 class="text-lg font-semibold mb-3 text-[var(--text-color)]">导出设置</h2>
-                    <div class="mb-4">
-                        <label for="export-format" class="block text-sm font-medium text-[var(--text-color)] mb-1">导出格式</label>
-                        <select id="export-format" 
-                                class="w-full bg-[var(--input-bg)] border border-[var(--border-color)] rounded-md px-3 py-2 text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="png">PNG</option>
-                            <option value="jpg">JPG</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label for="export-scale" class="block text-sm font-medium text-[var(--text-color)] mb-1">缩放比例 (%)</label>
-                        <input type="number" id="export-scale" min="10" max="200" value="100" 
-                               class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <!-- 添加JPG压缩质量控制 -->
-                    <div id="jpg-quality-container" class="mb-4 hidden">
-                        <label for="jpg-quality" class="block text-sm font-medium text-gray-300 mb-1">JPG压缩质量 (%)</label>
-                        <input type="number" id="jpg-quality" min="10" max="100" value="90" 
-                               class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div id="export-dimensions" class="text-sm text-gray-400 mb-4">
-                        输出尺寸: <span id="width-value">0</span> × <span id="height-value">0</span> 像素
-                    </div>
-                    <button id="export-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        <i class="fa fa-download mr-2"></i>导出图片
-                    </button>
-                </div>
-            </div>
-
-            <!-- 预览区域 -->
-            <div class="lg:col-span-3 bg-[var(--panel-bg)] rounded-lg p-5 flex flex-col border border-[var(--border-color)]">
-                <h2 class="text-lg font-semibold mb-3 text-[var(--text-color)]">预览</h2>
-                <div id="preview-container" class="flex-grow overflow-auto bg-[var(--bg-color)] rounded-md p-4 flex justify-center items-center border border-[var(--border-color)]">
-                    <div id="empty-state" class="text-center text-[var(--text-color)]">
-                        <i class="fa fa-picture-o text-5xl mb-3"></i>
-                        <p>上传图片后在此处预览拼版效果</p>
-                    </div>
-                    <canvas id="preview-canvas" class="max-w-full max-h-full bg-[var(--panel-bg)] rounded-md hidden"></canvas>
-                    <!-- 添加图片网格容器 -->
-                    <div id="preview-grid" class="grid gap-2 max-w-full max-h-full hidden"></div>
+                    <span class="text-gray-500 text-lg font-medium">敬请期待</span>
                 </div>
             </div>
         </div>
-    </main>
-
-    <footer class="py-4 px-6 border-t border-[var(--border-color)] text-center text-[var(--text-color)] text-sm">
-        桌游卡牌拼版工具(适用TTS桌游模拟器） &copy; 2025
-        <p class="text-sm">psdoc烛光 <a href="https://www.behance.net/psdoc" target="_blank" class="text-blue-400 hover:text-blue-300"><i class="fa fa-external-link mr-1"></i>behance.net/psdoc</a></p>
+    </div>
+    <!-- 页脚 -->
+    <footer class="py-6 px-6 mt-12 border-t border-gray-100">
+        <div class="container mx-auto text-center text-sm text-gray-500">
+            桌游设计师工具箱 &copy; 2025
+            <p class="mt-1"><a href="https://www.behance.net/psdoc" target="_blank" class="text-blue-500 hover:underline">behance.net/psdoc</a></p>
+        </div>
     </footer>
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // DOM元素
-            const fileInput = document.getElementById('file-input');
-            const fileCount = document.getElementById('file-count');
-            const cardsPerRowInput = document.getElementById('cards-per-row');
-            const exportFormatSelect = document.getElementById('export-format');
-            const exportScaleInput = document.getElementById('export-scale');
-            const exportBtn = document.getElementById('export-btn');
-            const previewCanvas = document.getElementById('preview-canvas');
-            const previewContainer = document.getElementById('preview-container');
-            const emptyState = document.getElementById('empty-state');
-            const widthValue = document.getElementById('width-value');
-            const heightValue = document.getElementById('height-value');
-            const dropArea = document.querySelector('label[for="file-input"]');
-            // 添加图片网格容器
-            const previewGrid = document.getElementById('preview-grid');
-            // 添加JPG质量控制元素
-            const jpgQualityContainer = document.getElementById('jpg-quality-container');
-            const jpgQualityInput = document.getElementById('jpg-quality');
-
-            // 主题切换元素
-            const themeWhiteBtn = document.getElementById('theme-white');
-            const themeBlackBtn = document.getElementById('theme-black');
-            const themeDarkGrayBtn = document.getElementById('theme-dark-gray');
-
-            // 全局变量
-            let uploadedImages = []; // 改为存储{name, img}对象
-            let cardWidth = 0;
-            let cardHeight = 0;
-            let draggedIndex = -1; // 拖动项索引
-            const ctx = previewCanvas.getContext('2d');
-
-            // 主题切换功能
-            function setTheme(theme) {
-                // 移除所有主题类
-                document.body.classList.remove('theme-white', 'theme-black', 'theme-dark-gray');
-                // 添加当前主题类
-                document.body.classList.add(`theme-${theme}`);
-                // 保存主题到localStorage
-                localStorage.setItem('theme', theme);
-                // 更新所有需要动态设置的元素
-                document.querySelectorAll('input, select').forEach(el => {
-                    el.style.backgroundColor = 'var(--input-bg)';
-                    el.style.borderColor = 'var(--border-color)';
-                    el.style.color = 'var(--text-color)';
-                });
-                document.querySelectorAll('h2').forEach(el => {
-                    el.style.color = 'var(--text-color)';
-                });
-            }
-
-            // 初始化主题
-            const savedTheme = localStorage.getItem('theme') || 'dark-gray';
-            setTheme(savedTheme);
-
-            // 主题按钮事件监听
-            themeWhiteBtn.addEventListener('click', () => setTheme('white'));
-            themeBlackBtn.addEventListener('click', () => setTheme('black'));
-            themeDarkGrayBtn.addEventListener('click', () => setTheme('dark-gray'));
-
-            // 事件监听
-            fileInput.addEventListener('change', handleFileSelect);
-            // 将原事件监听
-            cardsPerRowInput.addEventListener('input', updatePreview);
-            
-            // 修改为直接触发两个函数
-            cardsPerRowInput.addEventListener('input', () => {
-            updatePreview();
-            updateExportDimensions(); // 确保无论预览是否更新都计算尺寸
-            });
-            exportScaleInput.addEventListener('input', updateExportDimensions);
-            exportBtn.addEventListener('click', exportImage);
-            // 添加导出格式变化监听
-            exportFormatSelect.addEventListener('change', function() {
-                if (this.value === 'jpg') {
-                    jpgQualityContainer.classList.remove('hidden');
-                } else {
-                    jpgQualityContainer.classList.add('hidden');
-                }
-            });
-            
-            // 拖放功能
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropArea.addEventListener(eventName, preventDefaults, false);
-            });
-            
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropArea.addEventListener(eventName, highlight, false);
-            });
-            
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropArea.addEventListener(eventName, unhighlight, false);
-            });
-            
-            function highlight() {
-                dropArea.classList.add('drag-highlight');
-            }
-            
-            function unhighlight() {
-                dropArea.classList.remove('drag-highlight');
-            }
-            
-            dropArea.addEventListener('drop', handleDrop, false);
-            
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFiles(files);
-            }
-            
-            // 文件选择处理
-            function handleFileSelect(e) {
-                const files = e.target.files;
-                handleFiles(files);
-            }
-            
-            // 文件处理
-            function handleFiles(files) {
-                if (files.length === 0) return;
-                
-                // 限制最多70张图片
-                const maxFiles = 70;
-                const filesToProcess = Array.from(files).slice(0, maxFiles - uploadedImages.length);
-                
-                if (filesToProcess.length === 0) {
-                    alert('最多只能上传70张图片');
-                    return;
-                }
-                
-                // 创建临时数组存储新上传的图片，用于排序
-                const newImages = [];
-                
-                filesToProcess.forEach(file => {
-                    if (!file.type.match('image.*')) {
-                        alert('请只上传图片文件');
-                        return;
-                    }
-                    
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        const img = new Image();
-                        img.onload = function() {
-                            // 移除图片尺寸一致性检查
-                            if (uploadedImages.length === 0 && newImages.length === 0) {
-                                cardWidth = img.width;
-                                cardHeight = img.height;
-                            }
-                            
-                            // 存储文件名和图片对象
-                            newImages.push({ name: file.name, img: img });
-                            
-                            // 所有新图片加载完成后再添加和排序
-                            if (newImages.length === filesToProcess.length) {
-                                // 添加新图片并按文件名排序
-                                uploadedImages = [...uploadedImages, ...newImages]
-                                    .sort((a, b) => a.name.localeCompare(b.name));
-                                
-                                // 修复：基于排序后的第一张图片设置卡牌尺寸
-                                if (uploadedImages.length > 0) {
-                                    cardWidth = uploadedImages[0].img.width;
-                                    cardHeight = uploadedImages[0].img.height;
-                                }
-                                
-                                updateFileCount();
-                                updatePreview();
-                                updateExportDimensions();
-                                exportBtn.disabled = false;
-                            }
-                        };
-                        img.src = e.target.result;
-                    };
-                    
-                    reader.readAsDataURL(file);
-                });
-            }
-            
-            // 更新文件计数
-            function updateFileCount() {
-                fileCount.textContent = `已选择: ${uploadedImages.length}张图片`;
-            }
-            
-            // 更新预览
-            function updatePreview() {
-                if (uploadedImages.length === 0) {
-                    previewGrid.classList.add('hidden');
-                    emptyState.classList.remove('hidden');
-                    return;
-                }
-                
-                const cardsPerRow = parseInt(cardsPerRowInput.value) || 5;
-                // 设置网格列数
-                previewGrid.style.gridTemplateColumns = `repeat(${cardsPerRow}, 1fr)`;
-                
-                // 清空现有内容
-                previewGrid.innerHTML = '';
-                
-                // 创建图片预览项
-                uploadedImages.forEach((item, index) => {
-                    const img = item.img;
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item relative cursor-move transition-opacity';
-                    previewItem.draggable = true;
-                    
-                    // 添加拖动事件监听
-                    previewItem.addEventListener('dragstart', (e) => {
-                        draggedIndex = index;
-                        previewItem.classList.add('opacity-50');
-                        e.dataTransfer.effectAllowed = 'move';
-                    });
-                    
-                    previewItem.addEventListener('dragend', () => {
-                        previewItem.classList.remove('opacity-50');
-                        draggedIndex = -1;
-                        // 移除所有拖放相关类
-                        document.querySelectorAll('.preview-item').forEach(el => {
-                            el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
-                        });
-                    });
-                    
-                    previewItem.addEventListener('dragover', (e) => {
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
-                        if (index !== draggedIndex) {
-                            // 移除其他项的拖放样式
-                            document.querySelectorAll('.preview-item').forEach(el => {
-                                el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
-                            });
-                            // 添加拖放样式
-                            previewItem.classList.add('drag-over');
-                        }
-                    });
-                    
-                    previewItem.addEventListener('dragleave', () => {
-                        previewItem.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
-                    });
-                    
-                    previewItem.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        if (draggedIndex !== -1 && draggedIndex !== index) {
-                            // 实现拖放排序逻辑
-                            const temp = uploadedImages[draggedIndex];
-                            uploadedImages.splice(draggedIndex, 1);
-                            uploadedImages.splice(index, 0, temp);
-                            updatePreview();
-                        }
-                    });
-                    
-                    // 添加图片元素
-                    const imgElement = document.createElement('img');
-                    imgElement.src = img.src;
-                    imgElement.className = 'w-full h-auto object-contain';
-                    previewItem.appendChild(imgElement);
-                    
-                    // 添加文件名显示
-                    const nameElement = document.createElement('div');
-                    nameElement.className = 'preview-name';
-                    nameElement.textContent = item.name;
-                    previewItem.appendChild(nameElement);
-                    
-                    // 添加删除按钮
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.className = 'delete-btn';
-                    deleteBtn.innerHTML = '<i class="fa fa-trash"></i>';
-                    deleteBtn.addEventListener('click', () => {
-                        uploadedImages.splice(index, 1);
-                        updateFileCount();
-                        updatePreview();
-                        updateExportDimensions();
-                        if (uploadedImages.length === 0) {
-                            exportBtn.disabled = true;
-                        }
-                    });
-                    previewItem.appendChild(deleteBtn);
-                    
-                    previewGrid.appendChild(previewItem);
-                });
-                
-                emptyState.classList.add('hidden');
-                previewGrid.classList.remove('hidden');
-            }
-            
-            // 更新导出尺寸显示
-            function updateExportDimensions() {
-                if (cardWidth === 0 || cardHeight === 0 || uploadedImages.length === 0) {
-                    widthValue.textContent = '0';
-                    heightValue.textContent = '0';
-                    return;
-                }
-                
-                const cardsPerRow = parseInt(cardsPerRowInput.value) || 5;
-                const scale = parseInt(exportScaleInput.value) / 100;
-                const rows = Math.ceil(uploadedImages.length / cardsPerRow);
-                
-                const totalWidth = Math.round(cardWidth * cardsPerRow * scale);
-                const totalHeight = Math.round(cardHeight * rows * scale);
-                
-                widthValue.textContent = totalWidth;
-                heightValue.textContent = totalHeight;
-            }
-            
-            // 导出图片
-            function exportImage() {
-                if (uploadedImages.length === 0) return;
-                
-                const cardsPerRow = parseInt(cardsPerRowInput.value) || 5;
-                const scale = parseInt(exportScaleInput.value) / 100;
-                const format = exportFormatSelect.value;
-                const quality = format === 'jpg' ? parseInt(jpgQualityInput.value) / 100 : 1.0;
-                const rows = Math.ceil(uploadedImages.length / cardsPerRow);
-                
-                // 设置canvas尺寸
-                previewCanvas.width = cardWidth * cardsPerRow * scale;
-                previewCanvas.height = cardHeight * rows * scale;
-                
-                // 清空canvas
-                ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-                
-                // 绘制图片到canvas
-                uploadedImages.forEach((item, index) => {
-                    const img = item.img;
-                    const row = Math.floor(index / cardsPerRow);
-                    const col = index % cardsPerRow;
-                    const x = col * cardWidth * scale;
-                    const y = row * cardHeight * scale;
-                    
-                    ctx.drawImage(
-                        img,
-                        0, 0, img.width, img.height,
-                        x, y, cardWidth * scale, cardHeight * scale
-                    );
-                });
-                
-                // 隐藏网格预览，显示canvas
-                previewGrid.classList.add('hidden');
-                previewCanvas.classList.remove('hidden');
-                
-                // 创建下载链接
-                setTimeout(() => {
-                    const dataURL = previewCanvas.toDataURL(`image/${format}`, quality);
-                    const link = document.createElement('a');
-                    link.download = `cards-sheet.${format}`;
-                    link.href = dataURL;
-                    link.click();
-                    
-                    // 恢复网格预览
-                    setTimeout(() => {
-                        previewCanvas.classList.add('hidden');
-                        previewGrid.classList.remove('hidden');
-                    }, 100);
-                }, 100);
-            }
-        });
-    </script>
 </body>
 </html>
